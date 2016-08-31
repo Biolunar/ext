@@ -10,7 +10,7 @@ class Flags
 public:
 	Flags() noexcept : m_mask{} {}
 	Flags(BitType bit) noexcept : m_mask(static_cast<MaskType>(bit)) {}
-	Flags(MaskType mask) noexcept : m_mask(mask) {}
+	explicit Flags(MaskType mask) noexcept : m_mask(mask) {}
 	Flags(Flags<BitType, MaskType> const& rhs) noexcept : m_mask{rhs.m_mask} {}
 	Flags<BitType, MaskType>& operator=(Flags<BitType, MaskType> const& rhs) noexcept { m_mask = rhs.m_mask; return *this; }
 
