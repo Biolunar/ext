@@ -12,7 +12,7 @@ lib:
 tests:
 	@$(MAKE) --no-print-directory -C tests
 
-install:
+install: lib
 	@echo Installing library to $(PREFIX)/include and $(PREFIX)/lib
 	@mkdir -p $(PREFIX)/include $(PREFIX)/lib
 	@cp -r include/ext $(PREFIX)/include

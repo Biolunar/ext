@@ -1,30 +1,61 @@
 #ifndef HEADER_EXT_MEMORY_MAP_HPP_INCLUDED
 #define HEADER_EXT_MEMORY_MAP_HPP_INCLUDED
 
+#include "handle.hpp"
+
+#include <cassert>
+#include <cerrno>
+
+#include <utility>
+#include <system_error>
+
 #include <sys/mman.h>
 
 namespace ext
 {
 
-class MemoryMap
+namespace detail
+{
+
+using MmapPair = ::std::pair<void*, size_t>;
+
+} // namespace detail
+
+template<>
+struct HandleTraits<detail::MmapPair>
+{
+	using RawHandle = detail::MmapPair;
+	static RawHandle const& invalid() noexcept { static RawHandle const handle = ::std::make_pair(MAP_FAILED, 0); return handle; }
+	static void destroy(RawHandle const& handle) noexcept { ::munmap(handle.first, handle.second); }
+};
+
+class MemoryMap :
+	public Handle<HandleTraits<detail::MmapPair>>
 {
 public:
-	MemoryMap() noexcept;
-	MemoryMap(void* handle, size_t length) noexcept;
-	MemoryMap(void* addr, size_t length, int prot, int flags, int fd, off_t offset);
-	MemoryMap(MemoryMap const&) = delete;
-	~MemoryMap() noexcept;
-	MemoryMap& operator=(MemoryMap const&) = delete;
+	using Handle::Handle; // import ctors
 
-	void map(void* addr, size_t length, int prot, int flags, int fd, off_t offset);
-	void unmap();
+	void map(void* addr, size_t length, int prot, int flags, int fd, off_t offset)
+	{
+		assert(raw_handle() == Traits::invalid());
 
-	void* address() const noexcept { return m_address; }
+		m_raw_handle = ::std::make_pair(::mmap(addr, length, prot, flags, fd, offset), length);
+		if (m_raw_handle.first == MAP_FAILED)
+			throw ::std::system_error{errno, ::std::system_category(), u8"mmap"};
+	}
 
-private:
-	void* m_address;
-	size_t m_length;
+	void unmap()
+	{
+		assert(raw_handle() != Traits::invalid());
+
+		int const ret = ::munmap(m_raw_handle.first, m_raw_handle.second);
+		if (ret == -1)
+			throw ::std::system_error{errno, ::std::system_category(), u8"munmap"};
+		m_raw_handle = Traits::invalid();
+	}
 };
+
+using MemoryMapPtr = HandlePtr<MemoryMap>;
 
 } // namespace ext
 

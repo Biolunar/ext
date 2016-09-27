@@ -8,17 +8,11 @@ CXXWARNINGS := -Weverything -Wno-c++98-compat
 
 all: $(TARGET)
 
-$(TARGET): cores.o file.o memory_map.o
-	@ar rcs $(TARGET) cores.o file.o memory_map.o
+$(TARGET): cores.o
+	@ar rcs $(TARGET) cores.o
 
 cores.o: cores.c
 	@$(CC) $(CFLAGS) $(CWARNINGS) $(PARAMS) -c -o cores.o cores.c
-
-file.o: file.cpp
-	@$(CXX) $(CXXFLAGS) $(CXXWARNINGS) $(PARAMS) -c -o file.o file.cpp
-
-memory_map.o: memory_map.cpp
-	@$(CXX) $(CXXFLAGS) $(CXXWARNINGS) $(PARAMS) -c -o memory_map.o memory_map.cpp
 
 clean:
 	@rm -rf $(TARGET) *.o

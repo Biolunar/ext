@@ -1,7 +1,13 @@
 #ifndef HEADER_EXT_FILE_HPP_INCLUDED
 #define HEADER_EXT_FILE_HPP_INCLUDED
 
-// TODO: which headers are really required for mode_t and off_t?
+#include "handle.hpp"
+
+#include <cassert>
+#include <cerrno>
+
+#include <system_error>
+
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <fcntl.h>
@@ -10,26 +16,49 @@
 namespace ext
 {
 
-class File
+template<>
+struct HandleTraits<int>
+{
+	using RawHandle = int;
+	static RawHandle const& invalid() noexcept { static RawHandle const handle = -1; return handle; }
+	static void destroy(RawHandle const& handle) noexcept { ::close(handle); }
+};
+
+class File :
+	public Handle<HandleTraits<int>>
 {
 public:
-	File() noexcept;
-	File(int fd) noexcept;
-	File(char const* path_name, int flags, mode_t mode);
-	File(File const&) = delete;
-	~File() noexcept;
-	File& operator=(File const&) = delete;
+	using Handle::Handle; // import ctors
 
-	void open(char const* path_name, int flags, mode_t mode);
-	void close();
+	void open(char const* const path_name, int const flags, mode_t const mode)
+	{
+		assert(raw_handle() == Traits::invalid());
 
-	int handle() const noexcept { return m_handle; }
+		m_raw_handle = ::open(path_name, flags, mode);
+		if (raw_handle() == Traits::invalid())
+			throw ::std::system_error{errno, ::std::system_category(), u8"open"};
+	}
 
-	void truncate(off_t length);
+	void close()
+	{
+		assert(raw_handle() != Traits::invalid());
 
-private:
-	int m_handle;
+		auto const ret = ::close(raw_handle());
+		if (ret == -1)
+			throw ::std::system_error{errno, ::std::system_category(), u8"close"};
+		m_raw_handle = Traits::invalid();
+	}
+
+	void truncate(off_t const length)
+	{
+		assert(raw_handle() != Traits::invalid());
+
+		if (::ftruncate(raw_handle(), length) == -1)
+			throw ::std::system_error{errno, ::std::system_category(), u8"ftruncate"};
+	}
 };
+
+using FilePtr = HandlePtr<File>;
 
 } // namespace ext
 
