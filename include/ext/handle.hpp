@@ -24,11 +24,19 @@ public:
 	using Traits = HandleTraitsType;
 	using RawHandle = typename Traits::RawHandle;
 
-	static_assert(::std::is_nothrow_copy_constructible<RawHandle>::value, u8"RawHandle must be nothrow copy constructible");
-	static_assert(::std::is_nothrow_move_constructible<RawHandle>::value, u8"RawHandle must be nothrow move constructible");
-	static_assert(::std::is_nothrow_copy_assignable<RawHandle>::value, u8"RawHandle must be nothrow copy assignable");
-	static_assert(::std::is_nothrow_move_assignable<RawHandle>::value, u8"RawHandle must be nothrow move assignable");
-	static_assert(::std::is_nothrow_destructible<RawHandle>::value, u8"RawHandle must be nothrow destructible");
+	// TODO: Visual Studio 2015 Update 3 does not support u8"" in static_assert
+	//static_assert(::std::is_nothrow_copy_assignable<RawHandle>::value, "RawHandle must be nothrow copy assignable"); // does not work in VS for std::pair
+
+	// for default ctor if Traits::invalid() does not move its value && for explicit ctor
+	static_assert(::std::is_nothrow_copy_constructible<RawHandle>::value, "RawHandle must be nothrow copy constructible");
+
+	// for dtor
+	static_assert(::std::is_nothrow_destructible<RawHandle>::value, "RawHandle must be nothrow destructible");
+
+	// for swap()
+	static_assert(::std::is_nothrow_move_constructible<RawHandle>::value, "RawHandle must be nothrow move constructible");
+	static_assert(::std::is_nothrow_move_assignable<RawHandle>::value, "RawHandle must be nothrow move assignable");
+
 
 	Handle() = default;
 	Handle(Handle&& rhs) noexcept { swap(*this, rhs); }
@@ -40,15 +48,15 @@ public:
 			Traits::destroy(m_raw_handle);
 	}
 
-	friend void swap(Handle& lhs, Handle& rhs) noexcept // TODO: noexcept?
+	friend void swap(Handle& lhs, Handle& rhs) noexcept
 	{
 		using ::std::swap; // enable ADL
 		swap(lhs.m_raw_handle, rhs.m_raw_handle);
 	}
 
+protected:
 	RawHandle const& raw_handle() const noexcept { return m_raw_handle; }
 
-protected:
 	RawHandle m_raw_handle = Traits::invalid();
 
 private:
