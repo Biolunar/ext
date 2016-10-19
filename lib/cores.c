@@ -1,7 +1,24 @@
 #include "ext/cores.h"
 
-#include <stdio.h>
+#ifdef _WIN32
 
+#include <limits.h>
+
+#include <Windows.h>
+
+unsigned int ext_num_cores(void)
+{
+	SYSTEM_INFO info;
+	GetNativeSystemInfo(&info);
+	if (info.dwNumberOfProcessors > UINT_MAX)
+		return UINT_MAX;
+	else
+		return info.dwNumberOfProcessors;
+}
+
+#else // _WIN32
+
+#include <stdio.h>
 
 unsigned int ext_num_cores(void)
 {
@@ -22,3 +39,5 @@ unsigned int ext_num_cores(void)
 	fclose(file);
 	return ret;
 }
+
+#endif // _WIN32
