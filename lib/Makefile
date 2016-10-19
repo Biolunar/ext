@@ -1,20 +1,25 @@
 TARGET      := libext.a
 CC          := clang
 CXX         := clang++
-CFLAGS      := -std=c11 -I ../include -O3 -march=native
-CXXFLAGS    := -std=c++14 -stdlib=libc++ -I ../include -O3 -march=native
+CFLAGS      := -std=c11 -I ../include -O3 -march=native -DNDEBUG
+CXXFLAGS    := -std=c++14 -stdlib=libc++ -I ../include -O3 -march=native -DNDEBUG
 CWARNINGS   := -Weverything -Wno-c99-compat
 CXXWARNINGS := -Weverything -Wno-c++98-compat
 
-all: $(TARGET)
+BUILDDIR    := build
+TARGETDIR   := ../$(BUILDDIR)
 
-$(TARGET): cores.o
-	@ar rcs $(TARGET) cores.o
+all: ../$(BUILDDIR)/$(TARGET)
 
-cores.o: cores.c
-	@$(CC) $(CFLAGS) $(CWARNINGS) $(PARAMS) -c -o cores.o cores.c
+$(BUILDDIR)/cores.o: cores.c
+	@mkdir -p $(BUILDDIR)
+	@$(CC) $(CFLAGS) $(CWARNINGS) $(PARAMS) -c -o $(BUILDDIR)/cores.o cores.c
+
+$(TARGETDIR)/$(TARGET): $(BUILDDIR)/cores.o
+	@mkdir -p $(TARGETDIR)
+	@ar rcs $(TARGETDIR)/$(TARGET) $(BUILDDIR)/cores.o
 
 clean:
-	@rm -rf $(TARGET) *.o
+	@rm -rf $(TARGETDIR) $(BUILDDIR)
 
 .PHONY: all clean
