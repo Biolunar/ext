@@ -80,7 +80,7 @@ private:
 };
 
 template<typename HandleType>
-class HandlePtr
+class HandlePtr final
 {
 public:
 	using Handle = HandleType;
