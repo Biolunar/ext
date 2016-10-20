@@ -16,7 +16,7 @@ install: lib
 	@echo Installing library to $(PREFIX)/include and $(PREFIX)/lib
 	@mkdir -p $(PREFIX)/include $(PREFIX)/lib
 	@cp -r include/ext $(PREFIX)/include
-	@cp lib/libext.a $(PREFIX)/lib
+	@cp build/libext.a $(PREFIX)/lib
 
 uninstall:
 	@echo Uninstalling library from $(PREFIX)/include and $(PREFIX)/lib
