@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 Mahdi Khanalizadeh
+ * Copyright 2017 Mahdi Khanalizadeh
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,120 +17,104 @@
 #ifndef HEADER_EXT_VECTOR2_HPP_INCLUDED
 #define HEADER_EXT_VECTOR2_HPP_INCLUDED
 
-
 #include <cmath>
 
 #include <boost/operators.hpp>
 
-
 namespace ext
 {
 
+	template <typename T>
+	class Vector2 :
+		boost::equality_comparable<Vector2<T>,
+		boost::additive<Vector2<T>,
+		boost::multiplicative<Vector2<T>, T
+		>>>
+	{
+	public:
+		using Type = T;
 
-template <typename T>
-class vector2 :
-	boost::equality_comparable<vector2<T>,
-	boost::additive<vector2<T>,
-	boost::multiplicative<vector2<T>, T
-	>>>
-{
-public:
-	using type = T;
+		Type x;
+		Type y;
 
-	type x;
-	type y;
+		Vector2() : x{0}, y{0} {}
+		Vector2(Type x_, Type y_) : x{x_}, y{y_} {}
+		template <typename U>
+		Vector2(Vector2<U> const& v) : x{v.x}, y{v.y} {}
+	};
 
-	vector2() : x{0}, y{0} {}
-	vector2(type x_, type y_) : x{x_}, y{y_} {}
-	template <typename U>
-	vector2(vector2<U> const& v) : x{v.x}, y{v.y} {}
-};
+	using Vector2f = Vector2<float>;
+	using Vector2d = Vector2<double>;
+	using Vector2ld = Vector2<long double>;
 
+	template <typename T>
+	bool operator==(Vector2<T> const& v1, Vector2<T> const& v2)
+	{
+		return v1.x == v2.x && v1.y == v2.y;
+	}
 
-using vector2f = vector2<float>;
-using vector2d = vector2<double>;
-using vector2ld = vector2<long double>;
+	template <typename T>
+	Vector2<T>& operator+=(Vector2<T>& v1, Vector2<T> const& v2)
+	{
+		v1.x += v2.x;
+		v1.y += v2.y;
+		return v1;
+	}
 
+	template <typename T>
+	Vector2<T>& operator-=(Vector2<T>& v1, Vector2<T> const& v2)
+	{
+		v1.x -= v2.x;
+		v1.y -= v2.y;
+		return v1;
+	}
 
-template <typename T>
-bool operator==(vector2<T> const& v1, vector2<T> const& v2)
-{
-	return v1.x == v2.x && v1.y == v2.y;
-}
+	template <typename T>
+	Vector2<T>& operator*=(Vector2<T>& v, T t)
+	{
+		v.x *= t;
+		v.y *= t;
+		return v;
+	}
 
+	template <typename T>
+	Vector2<T>& operator/=(Vector2<T>& v, T t)
+	{
+		v.x /= t;
+		v.y /= t;
+		return v;
+	}
 
-template <typename T>
-vector2<T>& operator+=(vector2<T>& v1, vector2<T> const& v2)
-{
-	v1.x += v2.x;
-	v1.y += v2.y;
-	return v1;
-}
+	template <typename T>
+	Vector2<T> operator+(Vector2<T> const& v)
+	{
+		return v;
+	}
 
+	template <typename T>
+	Vector2<T> operator-(Vector2<T> const& v)
+	{
+		return {-v.x, -v.y};
+	}
 
-template <typename T>
-vector2<T>& operator-=(vector2<T>& v1, vector2<T> const& v2)
-{
-	v1.x -= v2.x;
-	v1.y -= v2.y;
-	return v1;
-}
+	template <typename T>
+	T dot(Vector2<T> const& v1, Vector2<T> const& v2)
+	{
+		return v1.x * v2.x + v1.y * v2.y;
+	}
 
+	template <typename T>
+	T norm(Vector2<T> const& v)
+	{
+		return std::sqrt(dot(v, v));
+	}
 
-template <typename T>
-vector2<T>& operator*=(vector2<T>& v, T t)
-{
-	v.x *= t;
-	v.y *= t;
-	return v;
-}
-
-
-template <typename T>
-vector2<T>& operator/=(vector2<T>& v, T t)
-{
-	v.x /= t;
-	v.y /= t;
-	return v;
-}
-
-
-template <typename T>
-vector2<T> operator+(vector2<T> const& v)
-{
-	return v;
-}
-
-
-template <typename T>
-vector2<T> operator-(vector2<T> const& v)
-{
-	return {-v.x, -v.y};
-}
-
-
-template <typename T>
-T dot(vector2<T> const& v1, vector2<T> const& v2)
-{
-	return v1.x * v2.x + v1.y * v2.y;
-}
-
-
-template <typename T>
-T norm(vector2<T> const& v)
-{
-	return std::sqrt(dot(v, v));
-}
-
-
-template <typename T>
-vector2<T> normalize(vector2<T> const& v)
-{
-	return v / norm(v);
-}
-
+	template <typename T>
+	Vector2<T> normalize(Vector2<T> const& v)
+	{
+		return v / norm(v);
+	}
 
 } // namespace ext
 
-
-#endif // HEADER_EXT_VECTOR2_HPP_INCLUDED
+#endif // !HEADER_EXT_VECTOR2_HPP_INCLUDED

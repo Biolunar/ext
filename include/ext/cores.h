@@ -22,5 +22,4 @@ extern "C"
 #endif // __cplusplus
 unsigned int ext_num_cores(void);
 
-
-#endif // HEADER_EXT_CORES_H_INCLUDED
+#endif // !HEADER_EXT_CORES_H_INCLUDED

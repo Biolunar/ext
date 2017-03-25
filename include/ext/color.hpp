@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 Mahdi Khanalizadeh
+ * Copyright 2017 Mahdi Khanalizadeh
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,52 +17,45 @@
 #ifndef HEADER_EXT_COLOR_HPP_INCLUDED
 #define HEADER_EXT_COLOR_HPP_INCLUDED
 
-
 #include <cmath>
 
 #include <boost/operators.hpp>
 
-
 namespace ext
 {
 
+	template <typename T>
+	class Color :
+		boost::multipliable<Color<T>>
+	{
+	public:
+		using Type = T;
 
-template <typename T>
-class color :
-	boost::multipliable<color<T>>
-{
-public:
-	using type = T;
+		Type r;
+		Type g;
+		Type b;
+		Type a;
 
-	type r;
-	type g;
-	type b;
-	type a;
+		Color() : r{0}, g{0}, b{0}, a{0} {}
+		Color(Type red, Type green, Type blue, Type alpha) : r{red}, g{green}, b{blue}, a{alpha} {}
+		template <typename U>
+		Color(Color<U> const& c) : r{c.r}, g{c.g}, b{c.b}, a{c.a} {}
+	};
 
-	color() : r{0}, g{0}, b{0}, a{0} {}
-	color(type red, type green, type blue, type alpha) : r{red}, g{green}, b{blue}, a{alpha} {}
-	template <typename U>
-	color(color<U> const& c) : r{c.r}, g{c.g}, b{c.b}, a{c.a} {}
-};
+	using Colorf = Color<float>;
+	using Colord = Color<double>;
+	using Colorld = Color<long double>;
 
-
-using colorf = color<float>;
-using colord = color<double>;
-using colorld = color<long double>;
-
-
-template <typename T>
-color<T>& operator*=(color<T>& c1, color<T> const& c2)
-{
-	c1.r *= c2.r;
-	c1.g *= c2.g;
-	c1.b *= c2.b;
-	c1.a *= c2.a;
-	return c1;
-}
-
+	template <typename T>
+	Color<T>& operator*=(Color<T>& c1, Color<T> const& c2)
+	{
+		c1.r *= c2.r;
+		c1.g *= c2.g;
+		c1.b *= c2.b;
+		c1.a *= c2.a;
+		return c1;
+	}
 
 } // namespace ext
 
-
-#endif // HEADER_EXT_COLOR_HPP_INCLUDED
+#endif // !HEADER_EXT_COLOR_HPP_INCLUDED

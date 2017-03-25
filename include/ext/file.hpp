@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 Mahdi Khanalizadeh
+ * Copyright 2017 Mahdi Khanalizadeh
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -32,50 +32,54 @@
 namespace ext
 {
 
-template<>
-struct HandleTraits<int>
-{
-	using RawHandle = int;
-	static RawHandle const& invalid() noexcept { static RawHandle const handle = -1; return handle; }
-	static void destroy(RawHandle const& handle) noexcept { ::close(handle); }
-};
-
-class File :
-	public Handle<HandleTraits<int>>
-{
-public:
-	using Handle::Handle; // import ctors
-
-	void open(char const* const path_name, int const flags, mode_t const mode)
+	namespace detail
 	{
-		assert(raw_handle() == Traits::invalid());
 
-		m_raw_handle = ::open(path_name, flags, mode);
-		if (raw_handle() == Traits::invalid())
-			throw ::std::system_error{errno, ::std::system_category(), u8"open"};
-	}
+		struct FileTraits
+		{
+			using RawHandle = int;
+			static RawHandle const& invalid() noexcept { static RawHandle const handle = -1; return handle; }
+			static void destroy(RawHandle const& handle) noexcept { ::close(handle); }
+		};
 
-	void close()
+	} // namespace detail
+
+	class File :
+		public Handle<detail::FileTraits>
 	{
-		assert(raw_handle() != Traits::invalid());
+	public:
+		using Handle::Handle; // import ctors
 
-		auto const ret = ::close(raw_handle());
-		if (ret == -1)
-			throw ::std::system_error{errno, ::std::system_category(), u8"close"};
-		m_raw_handle = Traits::invalid();
-	}
+		void open(char const* const path_name, int const flags, mode_t const mode)
+		{
+			assert(raw_handle() == Traits::invalid());
 
-	void truncate(off_t const length)
-	{
-		assert(raw_handle() != Traits::invalid());
+			m_raw_handle = ::open(path_name, flags, mode);
+			if (raw_handle() == Traits::invalid())
+				throw ::std::system_error{errno, ::std::system_category(), u8"open"};
+		}
 
-		if (::ftruncate(raw_handle(), length) == -1)
-			throw ::std::system_error{errno, ::std::system_category(), u8"ftruncate"};
-	}
-};
+		void close()
+		{
+			assert(raw_handle() != Traits::invalid());
 
-using FilePtr = HandlePtr<File>;
+			auto const ret = ::close(raw_handle());
+			if (ret == -1)
+				throw ::std::system_error{errno, ::std::system_category(), u8"close"};
+			m_raw_handle = Traits::invalid();
+		}
+
+		void truncate(off_t const length)
+		{
+			assert(raw_handle() != Traits::invalid());
+
+			if (::ftruncate(raw_handle(), length) == -1)
+				throw ::std::system_error{errno, ::std::system_category(), u8"ftruncate"};
+		}
+	};
+
+	using FilePtr = HandlePtr<File>;
 
 } // namespace ext
 
-#endif // HEADER_EXT_FILE_HPP_INCLUDED
+#endif // !HEADER_EXT_FILE_HPP_INCLUDED
