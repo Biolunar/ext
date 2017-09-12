@@ -18,7 +18,7 @@ TARGET      := libext.a
 CC          := clang
 CXX         := clang++
 CFLAGS      := -std=c11 -I ../include -O3 -march=native -DNDEBUG
-CXXFLAGS    := -std=c++14 -stdlib=libc++ -I ../include -O3 -march=native -DNDEBUG
+CXXFLAGS    := -std=c++14 -I ../include -O3 -march=native -DNDEBUG
 CWARNINGS   := -Weverything -Wno-c99-compat
 CXXWARNINGS := -Weverything -Wno-c++98-compat -Wno-c++98-compat-pedantic -Wno-exit-time-destructors
 

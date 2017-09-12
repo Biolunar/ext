@@ -21,6 +21,7 @@
 
 #include <cassert>
 #include <cerrno>
+#include <cstddef>
 
 #include <system_error>
 
@@ -75,6 +76,56 @@ namespace ext
 
 			if (::ftruncate(raw_handle(), length) == -1)
 				throw ::std::system_error{errno, ::std::system_category(), u8"ftruncate"};
+		}
+
+		::off_t lseek(::off_t const offset, int const whence)
+		{
+			assert(raw_handle() != Traits::invalid());
+
+			auto const ret = ::lseek(raw_handle(), offset, whence);
+			if (ret == static_cast<::off_t>(-1))
+				throw ::std::system_error{errno, ::std::system_category(), u8"lseek"};
+			return ret;
+		}
+
+		::std::size_t read(void* const buffer, ::std::size_t const count)
+		{
+			assert(raw_handle() != Traits::invalid());
+
+			auto const ret = ::read(raw_handle(), buffer, count);
+			if (ret == -1)
+				throw ::std::system_error{errno, ::std::system_category(), u8"read"};
+			return static_cast<::std::size_t>(ret);
+		}
+
+		::std::size_t pread(void* const buffer, ::std::size_t const count, ::off_t const offset)
+		{
+			assert(raw_handle() != Traits::invalid());
+
+			auto const ret = ::pread(raw_handle(), buffer, count, offset);
+			if (ret == -1)
+				throw ::std::system_error{errno, ::std::system_category(), u8"pread"};
+			return static_cast<::std::size_t>(ret);
+		}
+
+		::std::size_t write(void const* const buffer, ::std::size_t const count)
+		{
+			assert(raw_handle() != Traits::invalid());
+
+			auto const ret = ::write(raw_handle(), buffer, count);
+			if (ret == -1)
+				throw ::std::system_error{errno, ::std::system_category(), u8"write"};
+			return static_cast<::std::size_t>(ret);
+		}
+
+		::std::size_t pwrite(void const* const buffer, ::std::size_t const count, ::off_t const offset)
+		{
+			assert(raw_handle() != Traits::invalid());
+
+			auto const ret = ::pwrite(raw_handle(), buffer, count, offset);
+			if (ret == -1)
+				throw ::std::system_error{errno, ::std::system_category(), u8"pwrite"};
+			return static_cast<::std::size_t>(ret);
 		}
 	};
 
